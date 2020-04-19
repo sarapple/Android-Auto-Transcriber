@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -34,6 +35,7 @@ import com.bong.autotranscriber.Brother;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bong.autotranscriber.FileHelper;
 import com.midisheetmusic.drawerItems.ExpandableSwitchDrawerItem;
 import com.midisheetmusic.sheets.ClefSymbol;
 import com.mikepenz.materialdrawer.Drawer;
@@ -355,33 +357,46 @@ public class SheetMusicActivity extends MidiHandlingActivity {
          dialog.show();
     }
 
-    private ArrayList<Bitmap> getImagesFromPages(String filename) {
+    private ArrayList<Bitmap> getImagesFromPages(String filename, Context context) {
         ArrayList<Bitmap> allPages = new ArrayList<Bitmap>();
         int numpages = sheet.GetTotalPages();
         for (int page = 1; page <= numpages; page++) {
-            Bitmap image = Bitmap.createBitmap(SheetMusic.PageWidth + 40, SheetMusic.PageHeight + 40, Bitmap.Config.ARGB_8888);
+            Bitmap image = Bitmap.createBitmap(
+                    // TODO: Create a bitmap of all the parts
+                    SheetMusic.PageWidth + 40,
+//                    SheetMusic.PageHeight + 40,
+                    260 + 40,
+                    Bitmap.Config.ARGB_8888
+            );
             Canvas imageCanvas = new Canvas(image);
             sheet.DrawPage(imageCanvas, page);
+            File tempFile = FileHelper.Companion.getEmptyFileInFolder(
+                    this,
+                    "sheet_music",
+                    "testing_scale" + "_" + page + "_",
+                    ".png"
+                );
+            tempFile.mkdirs();
+            try {
+                OutputStream outStream = new FileOutputStream(tempFile, false);
+                image.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                outStream.close();
+            } catch (Exception ex) {
+                Toast.makeText(this, "Error: failed to write image to temp file.", Toast.LENGTH_SHORT).show();
+            }
 
-//            tempFile.mkdirs()
-//            val stream: OutputStream = FileOutputStream(tempFile)
-//            image.compress(Bitmap.CompressFormat.PNG, 100, stream)
-//            stream.close()
-//            val imageOrig = BitmapFactory.decodeFile(tempFile.toString())
+            Bitmap imageOrig = BitmapFactory.decodeFile(tempFile.toString());
 
-            allPages.add(image);
+//            new Brother().sendFileToRJ2150(imageOrig, context);
+
+//            allPages.add(imageOrig);
         }
 
         return allPages;
     }
 
     private void printImage(String filename, Context context) {
-        ArrayList<Bitmap> allPages = getImagesFromPages(filename);
-
-        for (int page = 1; page <= allPages.size(); page++) {
-            Bitmap image = allPages.get(page);
-            new Brother().sendFileToQL820NWB(image, context);
-        }
+        getImagesFromPages(filename, context);
     }
 
     /* Save the current sheet music as PNG images. */
