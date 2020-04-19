@@ -963,7 +963,7 @@ public class SheetMusic extends SurfaceView implements SurfaceHolder.Callback, S
 
 
     /** Obtain the drawing canvas and call onDraw() */
-    void draw() {
+    public void draw() {
         new Thread(() -> {
             if (!surfaceReady) {
                 return;

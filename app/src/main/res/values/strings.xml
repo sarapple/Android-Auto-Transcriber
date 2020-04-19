@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record">Record</string>
-    <string name="print">Choose Song</string>
+    <string name="choose_song">Choose Song</string>
+    <string name="stop">Stop</string>
 
     <string name="app_name">Enhanced MidiSheetMusic</string>
     <string name="song_settings_str">More Settings</string>
