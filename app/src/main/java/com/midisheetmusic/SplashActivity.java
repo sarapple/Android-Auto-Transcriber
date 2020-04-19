@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bong.autotranscriber.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.midisheetmusic.sheets.ClefSymbol;
 
@@ -39,7 +40,7 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(this, ChooseSongActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }
