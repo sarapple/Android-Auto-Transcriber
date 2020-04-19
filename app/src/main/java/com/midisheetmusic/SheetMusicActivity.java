@@ -369,54 +369,33 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         return bitmap;
     }
 
-    private ArrayList<Bitmap> getImagesFromPages(String filename, Context context) {
-        ArrayList<Bitmap> allPages = new ArrayList<Bitmap>();
-//        int numpages = sheet.GetTotalPages();
+    private Bitmap getImagesFromPages(String filename, Context context) {
         Bitmap bitmap = getBitmapFromView(sheet, BLACK);
-        Log.v("app", "here");
-//        LinearLayout view = (LinearLayout)findViewById(R.id.linearlayout);
-//        view.setDrawingCacheEnabled(true);
-//        view.buildDrawingCache();
-//        Bitmap bm = view.getDrawingCache();
-//        for (int page = 1; page <= numpages; page++) {
-//            Bitmap image = Bitmap.createBitmap(
-//                    // TODO: Create a bitmap of all the parts
-//                    layout.getWidth(),
-//                    layout.getHeight(),
-////                    SheetMusic.PageHeight + 40,
-////                    260 + 40,
-//                    Bitmap.Config.ARGB_8888
-//            );
-//
-//            Canvas imageCanvas = new Canvas(image);
-            Bitmap image = sheet.DrawPage();
-            File tempFile = FileHelper.Companion.getEmptyFileInFolder(
-                    this,
-                    "sheet_music",
-                    "testing_scale",
-                    ".png"
-                );
-            tempFile.mkdirs();
-            try {
-                OutputStream outStream = new FileOutputStream(tempFile, false);
-                image.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-                outStream.close();
-            } catch (Exception ex) {
-                Toast.makeText(this, "Error: failed to write image to temp file.", Toast.LENGTH_SHORT).show();
-            }
+        Bitmap image = sheet.DrawPage();
+        File tempFile = FileHelper.Companion.getEmptyFileInFolder(
+                this,
+                "sheet_music",
+                filename,
+                ".png"
+            );
+        tempFile.mkdirs();
+        try {
+            OutputStream outStream = new FileOutputStream(tempFile, false);
+            image.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.close();
+        } catch (Exception ex) {
+            Toast.makeText(this, "Error: failed to write image to temp file.", Toast.LENGTH_SHORT).show();
+        }
 
-            Bitmap imageOrig = BitmapFactory.decodeFile(tempFile.toString());
+        Bitmap imageOrig = BitmapFactory.decodeFile(tempFile.toString());
 
-            new Brother().sendFileToRJ2150(imageOrig, context);
-
-//            allPages.add(imageOrig);
-//        }
-
-        return allPages;
+        return imageOrig;
     }
 
     private void printImage(String filename, Context context) {
-        getImagesFromPages(filename, context);
+        Bitmap bitmap = getImagesFromPages(filename, context);
+
+        new Brother().sendFileToRJ2150(bitmap, context);
     }
 
     /* Save the current sheet music as PNG images. */
@@ -428,43 +407,9 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         catch (UnsupportedEncodingException e) {
             Toast.makeText(this, "Error: unsupported encoding in filename", Toast.LENGTH_SHORT).show();
         }
-        if (!options.scrollVert) {
-            options.scrollVert = true;
-            createSheetMusic(options);
-        }
-        try {
-            int numpages = sheet.GetTotalPages();
-            for (int page = 1; page <= numpages; page++) {
-                Bitmap image= Bitmap.createBitmap(SheetMusic.PageWidth + 40, SheetMusic.PageHeight + 40, Bitmap.Config.ARGB_8888);
-                Canvas imageCanvas = new Canvas(image);
-                sheet.DrawPage();
-                File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/MidiSheetMusic");
-                File file = new File(path, "" + filename + page + ".png");
-                path.mkdirs();
-                OutputStream stream = new FileOutputStream(file);
-                image.compress(Bitmap.CompressFormat.PNG, 0, stream);
-                stream.close();
 
-                // Inform the media scanner about the file
-                MediaScannerConnection.scanFile(this, new String[] { file.toString() }, null, null);
-            }
-        }
-        catch (IOException e) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Error saving image to file " + Environment.DIRECTORY_PICTURES + "/MidiSheetMusic/" + filename  + ".png");
-            builder.setCancelable(false);
-            builder.setPositiveButton("OK", (dialog, id) -> { });
-            AlertDialog alert = builder.create();
-            alert.show();
-        }
-        catch (NullPointerException e) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Ran out of memory while saving image to file " + Environment.DIRECTORY_PICTURES + "/MidiSheetMusic/" + filename  + ".png");
-            builder.setCancelable(false);
-            builder.setPositiveButton("OK", (dialog, id) -> {});
-            AlertDialog alert = builder.create();
-            alert.show();
-        }
+        getImagesFromPages(filename, this);
+        Toast.makeText(this, "File was saved to cache directory: /sheet_music/{filename}.png", Toast.LENGTH_SHORT).show();
     }
 
 

@@ -215,6 +215,7 @@ class MediaCenterFragment : Fragment() {
     private fun setState (fields: MediaStateFields) {
         button_record.setText(fields.buttonRecordText)
         button_choose_song.isEnabled = fields.isChooseSongButtonEnabled
+        button_choose_song.isClickable = !fields.isChooseSongButtonEnabled
 
         mediaStateFields = fields
     }
@@ -272,14 +273,6 @@ class MediaCenterFragment : Fragment() {
         button_choose_song.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, null, this.context, ChooseSongActivity::class.java)
             startActivity(intent)
-
-            if (mediaStateFields.currentMediaState == MediaState.RECORDING) {
-                // button should be disabled
-            } else {
-                Toast.makeText(context, "Error: Please stop your recording first.", Toast.LENGTH_SHORT)
-                        .show()
-                // Notify that recording needs to happen first.
-            }
         }
     }
 }
