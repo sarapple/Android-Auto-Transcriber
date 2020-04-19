@@ -24,6 +24,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +56,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.zip.CRC32;
+
+import static android.graphics.Color.BLACK;
 
 /**
  * SheetMusicActivity is the main activity. The main components are:
@@ -357,23 +360,40 @@ public class SheetMusicActivity extends MidiHandlingActivity {
          dialog.show();
     }
 
+    public Bitmap getBitmapFromView(View view, int defaultColor)
+    {
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(defaultColor);
+        view.draw(canvas);
+        return bitmap;
+    }
+
     private ArrayList<Bitmap> getImagesFromPages(String filename, Context context) {
         ArrayList<Bitmap> allPages = new ArrayList<Bitmap>();
-        int numpages = sheet.GetTotalPages();
-        for (int page = 1; page <= numpages; page++) {
-            Bitmap image = Bitmap.createBitmap(
-                    // TODO: Create a bitmap of all the parts
-                    SheetMusic.PageWidth + 40,
-//                    SheetMusic.PageHeight + 40,
-                    260 + 40,
-                    Bitmap.Config.ARGB_8888
-            );
-            Canvas imageCanvas = new Canvas(image);
-            sheet.DrawPage(imageCanvas, page);
+//        int numpages = sheet.GetTotalPages();
+        Bitmap bitmap = getBitmapFromView(sheet, BLACK);
+        Log.v("app", "here");
+//        LinearLayout view = (LinearLayout)findViewById(R.id.linearlayout);
+//        view.setDrawingCacheEnabled(true);
+//        view.buildDrawingCache();
+//        Bitmap bm = view.getDrawingCache();
+//        for (int page = 1; page <= numpages; page++) {
+//            Bitmap image = Bitmap.createBitmap(
+//                    // TODO: Create a bitmap of all the parts
+//                    layout.getWidth(),
+//                    layout.getHeight(),
+////                    SheetMusic.PageHeight + 40,
+////                    260 + 40,
+//                    Bitmap.Config.ARGB_8888
+//            );
+//
+//            Canvas imageCanvas = new Canvas(image);
+            Bitmap image = sheet.DrawPage();
             File tempFile = FileHelper.Companion.getEmptyFileInFolder(
                     this,
                     "sheet_music",
-                    "testing_scale" + "_" + page + "_",
+                    "testing_scale",
                     ".png"
                 );
             tempFile.mkdirs();
@@ -387,10 +407,10 @@ public class SheetMusicActivity extends MidiHandlingActivity {
 
             Bitmap imageOrig = BitmapFactory.decodeFile(tempFile.toString());
 
-//            new Brother().sendFileToRJ2150(imageOrig, context);
+            new Brother().sendFileToRJ2150(imageOrig, context);
 
 //            allPages.add(imageOrig);
-        }
+//        }
 
         return allPages;
     }
@@ -417,7 +437,7 @@ public class SheetMusicActivity extends MidiHandlingActivity {
             for (int page = 1; page <= numpages; page++) {
                 Bitmap image= Bitmap.createBitmap(SheetMusic.PageWidth + 40, SheetMusic.PageHeight + 40, Bitmap.Config.ARGB_8888);
                 Canvas imageCanvas = new Canvas(image);
-                sheet.DrawPage(imageCanvas, page);
+                sheet.DrawPage();
                 File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/MidiSheetMusic");
                 File file = new File(path, "" + filename + page + ".png");
                 path.mkdirs();

@@ -1114,105 +1114,67 @@ public class SheetMusic extends SurfaceView implements SurfaceHolder.Callback, S
      * If the sheet music has exactly 2 tracks, then two staffs should
      * fit within a single page, and not be split across two pages.
      */
-    public void DrawPage(Canvas canvas, int pagenumber)
+    public Bitmap DrawPage()
     {
         int leftmargin = 20;
         int topmargin = 20;
-        //int rightmargin = 20;
-        //int bottommargin = 20;
 
-        //float scale = 1.0f;
-        Rect clip = new Rect(0, 0, PageWidth + 40, PageHeight + 40);
+        int totalHeight = 0;
+        for (int i = 0; i < staffs.size(); i = i + 2) {
+            int currHeight = staffs.get(i).getHeight() + staffs.get(i + 1).getHeight();
+            if (currHeight > totalHeight) {
+                totalHeight = currHeight;
+            }
+        }
+        totalHeight = totalHeight + (topmargin * 2);
+
+        int totalWidth = 0;
+        for (int i = 0; i < staffs.size(); i = i + 2) {
+            int currWidth = staffs.get(i).getWidth();
+            totalWidth += currWidth;
+        }
+        totalWidth = totalWidth + (leftmargin * 2);
+
+        Bitmap image = Bitmap.createBitmap(
+                // TODO: Create a bitmap of all the parts
+                totalWidth,
+                totalHeight,
+                Bitmap.Config.ARGB_8888
+        );
+        Canvas canvas = new Canvas(image);
 
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.WHITE);
-        canvas.drawRect(clip.left, clip.top, clip.right, clip.bottom, paint);
+        canvas.drawRect(0, 0, totalWidth, totalHeight, paint);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.BLACK);
 
-        int ypos = TitleHeight;
-        int pagenum = 1;
-        int staffnum = 0;
+        int first_staff = 0;
+        // first staff
+        int staffWidth = staffs.get(first_staff).getWidth();
+        int staffHeight =  staffs.get(first_staff).getHeight();
 
-        if (numtracks == 2 && (staffs.size() % 2) == 0) {
-            /* Skip the staffs until we reach the given page number */
-            while (staffnum + 1 < staffs.size() && pagenum < pagenumber) {
-                int heights = staffs.get(staffnum).getHeight() +
-                              staffs.get(staffnum+1).getHeight();
-                if (ypos + heights >= PageHeight) {
-                    pagenum++;
-                    ypos = 0;
-                }
-                else {
-                    ypos += heights;
-                    staffnum += 2;
-                }
-            }
-            /* Print the staffs until the height reaches PageHeight */
-            if (pagenum == 1) {
-                DrawTitle(canvas);
-                ypos = TitleHeight;
-            }
-            else {
-                ypos = 0;
-            }
-            for (; staffnum + 1 < staffs.size(); staffnum += 2) {
-                int heights = staffs.get(staffnum).getHeight() +
-                              staffs.get(staffnum+1).getHeight();
+        canvas.translate(leftmargin, topmargin);
 
-                if (ypos + heights >= PageHeight)
-                    break;
+        // clip the size of the rectangle to match the staff
+        Rect clipFirst = new Rect(0, 0, staffWidth, staffHeight);
 
-                canvas.translate(leftmargin, topmargin + ypos);
-                staffs.get(staffnum).Draw(canvas, clip, paint);
-                canvas.translate(-leftmargin, -(topmargin + ypos));
-                ypos += staffs.get(staffnum).getHeight();
-                canvas.translate(leftmargin, topmargin + ypos);
-                staffs.get(staffnum + 1).Draw(canvas, clip, paint);
-                canvas.translate(-leftmargin, -(topmargin + ypos));
-                ypos += staffs.get(staffnum + 1).getHeight();
-            }
-        }
+        // apply onto the canvas (where translated, the staff image)
+        staffs.get(first_staff).Draw(canvas, clipFirst, paint);
 
-        else {
-            /* Skip the staffs until we reach the given page number */
-            while (staffnum < staffs.size() && pagenum < pagenumber) {
-                if (ypos + staffs.get(staffnum).getHeight() >= PageHeight) {
-                    pagenum++;
-                    ypos = 0;
-                }
-                else {
-                    ypos += staffs.get(staffnum).getHeight();
-                    staffnum++;
-                }
-            }
+        int second_staff = 1;
 
-            /* Print the staffs until the height reaches viewPageHeight */
-            if (pagenum == 1) {
-                DrawTitle(canvas);
-                ypos = TitleHeight;
-            }
-            else {
-                ypos = 0;
-            }
-            for (; staffnum < staffs.size(); staffnum++) {
-                if (ypos + staffs.get(staffnum).getHeight() >= PageHeight)
-                    break;
+        // move down by tthe height of one staff
+        canvas.translate(0, staffHeight);
 
-                canvas.translate(leftmargin, topmargin + ypos);
-                staffs.get(staffnum).Draw(canvas, clip, paint);
-                canvas.translate(-leftmargin, -(topmargin + ypos));
-                ypos += staffs.get(staffnum).getHeight();
-            }
-        }
+        // apply onto the canvas a second clip (same width and height of the staff image again)
+        Rect clipSecond = new Rect(0, 0, staffWidth, staffHeight);
 
-        /* Draw the page number */
-        canvas.drawText("" + pagenumber,
-                        PageWidth-leftmargin,
-                        topmargin + PageHeight - 12,
-                        paint);
+        // Draw that staff onto the canvas
+        staffs.get(second_staff).Draw(canvas, clipSecond, paint);
 
+        return image;
     }
 
 

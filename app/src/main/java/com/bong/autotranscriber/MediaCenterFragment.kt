@@ -184,7 +184,7 @@ class MediaCenterFragment : Fragment() {
                         Bitmap.Config.ARGB_8888
                 )
                 val imageCanvas = Canvas(image)
-                sheetView.DrawPage(imageCanvas, page)
+                sheetView.DrawPage()
                 val tempFile = getEmptyFileInFolder(
                         this.context!!,
                         "sheet_music",
