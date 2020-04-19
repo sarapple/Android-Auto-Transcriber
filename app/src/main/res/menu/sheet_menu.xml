@@ -6,5 +6,8 @@
     <item
         android:id="@+id/save_images"
         android:title="@string/save_images_str" />
+    <item
+        android:id="@+id/print_images"
+        android:title="@string/print_images" />
 </menu>
 

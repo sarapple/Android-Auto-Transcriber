@@ -13,6 +13,7 @@
 package com.midisheetmusic;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -29,6 +30,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import com.bong.autotranscriber.Brother;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -49,6 +51,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.zip.CRC32;
 
 /**
@@ -270,6 +273,10 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 showSaveImagesDialog();
                 drawer.closeDrawer();
                 break;
+            case R.id.print_images:
+                printImage("Printing", this);
+                drawer.closeDrawer();
+                break;
             case ID_LOOP_START:
                 // Note that we display the measure numbers starting at 1,
                 // but the actual playMeasuresInLoopStart field starts at 0.
@@ -348,6 +355,34 @@ public class SheetMusicActivity extends MidiHandlingActivity {
          dialog.show();
     }
 
+    private ArrayList<Bitmap> getImagesFromPages(String filename) {
+        ArrayList<Bitmap> allPages = new ArrayList<Bitmap>();
+        int numpages = sheet.GetTotalPages();
+        for (int page = 1; page <= numpages; page++) {
+            Bitmap image = Bitmap.createBitmap(SheetMusic.PageWidth + 40, SheetMusic.PageHeight + 40, Bitmap.Config.ARGB_8888);
+            Canvas imageCanvas = new Canvas(image);
+            sheet.DrawPage(imageCanvas, page);
+
+//            tempFile.mkdirs()
+//            val stream: OutputStream = FileOutputStream(tempFile)
+//            image.compress(Bitmap.CompressFormat.PNG, 100, stream)
+//            stream.close()
+//            val imageOrig = BitmapFactory.decodeFile(tempFile.toString())
+
+            allPages.add(image);
+        }
+
+        return allPages;
+    }
+
+    private void printImage(String filename, Context context) {
+        ArrayList<Bitmap> allPages = getImagesFromPages(filename);
+
+        for (int page = 1; page <= allPages.size(); page++) {
+            Bitmap image = allPages.get(page);
+            new Brother().sendFileToQL820NWB(image, context);
+        }
+    }
 
     /* Save the current sheet music as PNG images. */
     private void saveAsImages(String name) {

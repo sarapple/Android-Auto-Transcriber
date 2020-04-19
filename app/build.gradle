@@ -38,6 +38,7 @@ dependencies {
     implementation 'commons-io:commons-io:2.5'
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'com.kailashdabhi:om-recorder:1.1.5'
+    implementation project(":BrotherPrintLibrary")
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'
