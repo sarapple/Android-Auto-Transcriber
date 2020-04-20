@@ -14,23 +14,23 @@ import java.io.File
 class RecorderAdapter() {
     private var recordTask: Recorder? = null;
 
-    private fun mic(): PullableSource? {
-        return PullableSource.Default(
-            AudioRecordConfig.Default(
-                MediaRecorder.AudioSource.MIC, AudioFormat.ENCODING_PCM_16BIT,
-                AudioFormat.CHANNEL_IN_MONO, 44100
-            )
-        )
-    }
+//    private fun mic(): PullableSource? {
+//        return PullableSource.Default(
+//            AudioRecordConfig.Default(
+//                MediaRecorder.AudioSource.MIC, AudioFormat.ENCODING_PCM_16BIT,
+//                AudioFormat.CHANNEL_IN_MONO, 44100
+//            )
+//        )
+//    }
     fun setupRecorder(musicFile: File) {
-        recordTask = OmRecorder.wav(
-            PullTransport.Default(mic(),
-                OnAudioChunkPulledListener { audioChunk -> Log.i("app", audioChunk.maxAmplitude().toString()) }),
-            musicFile
-        )
+//        recordTask = OmRecorder.wav(
+//            PullTransport.Default(mic(),
+//                OnAudioChunkPulledListener { audioChunk -> Log.i("app", audioChunk.maxAmplitude().toString()) }),
+//            musicFile
+//        )
 
-        recordTask!!.startRecording();
-        recordTask!!.pauseRecording();
+//        recordTask!!.startRecording();
+//        recordTask!!.pauseRecording();
     }
 
 

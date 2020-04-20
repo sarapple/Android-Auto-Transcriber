@@ -274,10 +274,6 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 changeSettings();
                 drawer.closeDrawer();
                 break;
-            case R.id.save_images:
-                showSaveImagesDialog();
-                drawer.closeDrawer();
-                break;
             case R.id.print_images:
                 printImage("Printing", this);
                 drawer.closeDrawer();
@@ -395,7 +391,12 @@ public class SheetMusicActivity extends MidiHandlingActivity {
     private void printImage(String filename, Context context) {
         Bitmap bitmap = getImagesFromPages(filename, context);
 
-        new Brother().sendFileToRJ2150(bitmap, context);
+        try {
+            new Brother().sendFileToRJ2150(bitmap, context);
+        } catch (Exception ex) {
+            Toast.makeText(this, "Error: failed to print. Make sure that printer is connected.", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     /* Save the current sheet music as PNG images. */
