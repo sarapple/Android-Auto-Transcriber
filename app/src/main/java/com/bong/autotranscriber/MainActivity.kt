@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 .setColor(ContextCompat.getColor(this, R.color.recorder_bg))
                 .setRequestCode(requestRecordAudio) // Optional
                 .setSource(AudioSource.MIC)
-                .setChannel(AudioChannel.STEREO)
+                .setChannel(AudioChannel.MONO)
                 .setSampleRate(AudioSampleRate.HZ_16000)
                 .setAutoStart(false)
                 .setKeepDisplayOn(true) // Start recording
