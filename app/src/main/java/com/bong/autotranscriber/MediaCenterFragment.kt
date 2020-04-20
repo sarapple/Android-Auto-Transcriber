@@ -2,43 +2,29 @@ package com.bong.autotranscriber
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
-import com.bong.autotranscriber.FileHelper.Companion.getEmptyFileInFolder
 import com.midisheetmusic.*
-import com.midisheetmusic.sheets.ClefSymbol
 import kotlinx.android.synthetic.main.fragment_first.*
 import org.apache.commons.io.FileUtils
 import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class MediaCenterFragment : Fragment() {
-    private var sheet /* The sheet music */: SheetMusic? = null
-    private var layout /* The layout */: LinearLayout? = null
-    private var options /* The options for sheet music and sound */: MidiOptions? = null
     private var mediaStateFields: MediaStateFields = MediaStateFields()
     private var recorder: RecorderAdapter = RecorderAdapter()
-    private var midifile: MidiFile? = null;
     private var currMusicFile: File? = null;
 
     enum class MediaState {
@@ -46,7 +32,7 @@ class MediaCenterFragment : Fragment() {
     }
 
     class MediaStateFields () {
-        var buttonRecordText: Int = R.string.record
+        var buttonRecordBackground: Int = R.drawable.play_icon;
         var currentMediaState: MediaState = MediaState.IDLE
         var isChooseSongButtonEnabled: Boolean = true
     }
@@ -140,80 +126,8 @@ class MediaCenterFragment : Fragment() {
         }
     }
 
-    private fun setupViews(midiFile: MidiFile) {
-        val activity = activity!!
-
-        // Keep screen on
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        ClefSymbol.LoadImages(context)
-        TimeSigSymbol.LoadImages(context)
-
-        options = MidiOptions(midiFile)
-
-        layout = activity.findViewById<LinearLayout>(R.id.linearLayout2)
-        createSheetMusic(options!!, midiFile)
-    }
-
-    /** Create the SheetMusic view with the given options  */
-    private fun createSheetMusic(options: MidiOptions, midiFile: MidiFile) {
-        if (sheet != null) {
-            layout!!.removeView(sheet)
-        }
-        sheet = SheetMusic(context)
-        sheet!!.init(midiFile, options)
-        layout!!.addView(sheet)
-        layout!!.requestLayout()
-        sheet!!.draw()
-    }
-
-    /* Save the current sheet music as PNG images. */
-    private fun saveAsImages(sheetView: SheetMusic) {
-        if (!options!!.scrollVert) {
-            options!!.scrollVert = true
-            createSheetMusic(options!!, midifile!!)
-        }
-        try {
-            val numpages = sheetView.GetTotalPages()
-            for (page in 1..numpages) {
-                val image = Bitmap.createBitmap(
-                        SheetMusic.PageWidth + 40,
-                        // TODO: Ensure all pages print (wait for first print completion?)
-//                    SheetMusic.PageHeight + 40,
-                        220 + 40,
-                        Bitmap.Config.ARGB_8888
-                )
-                val imageCanvas = Canvas(image)
-                sheetView.DrawPage()
-                val tempFile = getEmptyFileInFolder(
-                        this.context!!,
-                        "sheet_music",
-                        "testing_scale" + "_" + page + "_",
-                        ".png"
-                )
-                tempFile.mkdirs()
-                val stream: OutputStream = FileOutputStream(tempFile)
-                image.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                stream.close()
-
-                // Inform the media scanner about the file
-                MediaScannerConnection.scanFile(
-                        this.context!!,
-                        arrayOf(tempFile.toString()),
-                        null,
-                        null
-                )
-                val imageOrig = BitmapFactory.decodeFile(tempFile.toString())
-//                Brother().sendFileToQL820NWB(imageOrig, this.context!!)
-            }
-        } catch (e: Exception) {
-            Toast.makeText(context, "Error: Failed to print", Toast.LENGTH_SHORT)
-                    .show()
-        }
-    }
-
     private fun setState (fields: MediaStateFields) {
-        button_record.setText(fields.buttonRecordText)
+        button_record.setBackgroundResource(fields.buttonRecordBackground);
         button_choose_song.isEnabled = fields.isChooseSongButtonEnabled
         button_choose_song.isClickable = !fields.isChooseSongButtonEnabled
 
@@ -223,17 +137,17 @@ class MediaCenterFragment : Fragment() {
     private fun getStateByMediaState (mediaState: MediaState): MediaStateFields {
         when (mediaState) {
             MediaState.IDLE -> MediaStateFields().apply {
-                buttonRecordText = R.string.record
+                buttonRecordBackground = R.drawable.play_icon;
                 currentMediaState = mediaState
                 isChooseSongButtonEnabled = true
             }
             MediaState.RECORDING -> return MediaStateFields().apply {
-                buttonRecordText = R.string.stop
+                buttonRecordBackground = R.drawable.stop_icon;
                 currentMediaState = mediaState
                 isChooseSongButtonEnabled = false
             }
             MediaState.IDLE_WITH_RECORDING_DATA -> return MediaStateFields().apply {
-                buttonRecordText = R.string.record
+                buttonRecordBackground = R.drawable.play_icon;
                 currentMediaState = mediaState
                 isChooseSongButtonEnabled = true
             }
@@ -271,6 +185,7 @@ class MediaCenterFragment : Fragment() {
 
     fun setupChooseSongButton() {
         button_choose_song.setOnClickListener {
+            Log.v("app", "here");
             val intent = Intent(Intent.ACTION_VIEW, null, this.context, ChooseSongActivity::class.java)
             startActivity(intent)
         }
