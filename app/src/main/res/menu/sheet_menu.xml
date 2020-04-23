@@ -4,7 +4,10 @@
         android:id="@+id/song_settings"
         android:title="@string/song_settings_str" />
     <item
-        android:id="@+id/print_images"
-        android:title="@string/print_images" />
+        android:id="@+id/print_images_ql"
+        android:title="@string/print_images_ql" />
+    <item
+        android:id="@+id/print_images_rj"
+        android:title="@string/print_images_rj" />
 </menu>
 

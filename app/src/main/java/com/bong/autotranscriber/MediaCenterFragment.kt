@@ -60,8 +60,8 @@ class MediaCenterFragment : Fragment() {
     fun convertWAVToMIDI (wavFile: File) {
 //        val wavFile = FileHelper.assetFileCopy(context!!, "wavable_wavable.wav")
         val wavBytes: ByteArray = FileUtils.readFileToByteArray(wavFile);
-        val url = "http://192.168.1.131:5000/music"
-//        val url = "http://10.0.2.2:5000/music"
+        val url = "http://192.168.1.131:5000/wav-to-midi"
+//        val url = "http://10.0.2.2:5000/wav-to-midi"
         val queue = Volley.newRequestQueue(this.context)
 
         queue.add(makeHttpRequest(url, wavBytes, this.context!!))

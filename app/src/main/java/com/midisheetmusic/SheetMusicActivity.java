@@ -274,8 +274,12 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 changeSettings();
                 drawer.closeDrawer();
                 break;
-            case R.id.print_images:
-                printImage("Printing", this);
+            case R.id.print_images_ql:
+                printImageQL("Printing", this);
+                drawer.closeDrawer();
+                break;
+            case R.id.print_images_rj:
+                printImageRJ("Printing", this);
                 drawer.closeDrawer();
                 break;
             case ID_LOOP_START:
@@ -388,7 +392,17 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         return imageOrig;
     }
 
-    private void printImage(String filename, Context context) {
+    private void printImageQL(String filename, Context context) {
+        Bitmap bitmap = getImagesFromPages(filename, context);
+
+        try {
+            new Brother().sendFileToQL820NWB(bitmap, context);
+        } catch (Exception ex) {
+            Toast.makeText(this, "Error: failed to print. Make sure that printer is connected.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void printImageRJ(String filename, Context context) {
         Bitmap bitmap = getImagesFromPages(filename, context);
 
         try {

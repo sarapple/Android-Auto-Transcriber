@@ -3,8 +3,8 @@
     <string name="record">Record</string>
     <string name="choose_song">Choose Song</string>
     <string name="stop">Stop</string>
-    <string name="print_images">Print Images</string>
-
+    <string name="print_images_rj">Print To RJ</string>
+    <string name="print_images_ql">Print To QL</string>
     <string name="app_name">Enhanced MidiSheetMusic</string>
     <string name="song_settings_str">More Settings</string>
     <string name="save_images_str">Save As Images</string>

@@ -25,11 +25,11 @@ public class Brother {
         PrinterInfo printerInfo = printer.getPrinterInfo();
 
         // Ensure your printer is connected to the same wi-fi used by your device
-        printerInfo.ipAddress = "192.168.1.134";
+        printerInfo.ipAddress = "10.0.0.43";
         printerInfo.printerModel = PrinterInfo.Model.QL_820NWB;
         printerInfo.port = PrinterInfo.Port.NET;
 
-        printerInfo.labelNameIndex = LabelInfo.QL700.W62RB.ordinal();
+        printerInfo.labelNameIndex = LabelInfo.QL700.W62.ordinal();
         printerInfo.isAutoCut = true;
 //        printerInfo.printMode = PrinterInfo.PrintMode.ORIGINAL;
         printerInfo.paperSize = PrinterInfo.PaperSize.CUSTOM;
