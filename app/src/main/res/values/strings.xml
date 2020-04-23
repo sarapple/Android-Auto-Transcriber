@@ -5,7 +5,7 @@
     <string name="stop">Stop</string>
     <string name="print_images_rj">Print To RJ</string>
     <string name="print_images_ql">Print To QL</string>
-    <string name="app_name">Enhanced MidiSheetMusic</string>
+    <string name="app_name">Auto Transcorder</string>
     <string name="song_settings_str">More Settings</string>
     <string name="save_images_str">Save As Images</string>
     <string name="save_images_descr_str">Save the sheet music as images, in the directory /Pictures/MidiSheetMusic, with the following filename</string>
@@ -41,7 +41,7 @@
     <string name="scan_button_title">Scan SD Card for MIDI files</string>
     <string name="scan_files_str">Scan for MIDI Files</string>
     <string name="browse_files_str">Browse for MIDI Files</string>
-    <string name="msg_permission_denied">Storage permission is needed to load MIDI files</string>
+    <string name="msg_permission_denied">All permissions are needed for proper functioning of the app.</string>
     <string name="msg_permission_denied_retry">Try again</string>
     <string name="err_file_not_found">Not found: Item doesn\'t exist!</string>
     <string name="title_activity_settings">Song Settings</string>

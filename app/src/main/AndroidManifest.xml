@@ -5,18 +5,17 @@
     android:versionName="2.6">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <!-- For Wi-Fi -->
     <uses-permission android:name="android.permission.INTERNET" />
-
     <!-- For Bluetooth -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
+    <!--  For Recording audio  -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity

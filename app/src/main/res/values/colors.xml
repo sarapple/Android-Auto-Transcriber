@@ -17,5 +17,5 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="recorder_bg">#F4511E</color>
+    <color name="recorder_bg">#3F51B5</color>
 </resources>

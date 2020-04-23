@@ -37,8 +37,6 @@ class MainActivity : AppCompatActivity() {
             supportActionBar!!.setBackgroundDrawable(
                     ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryDark)))
         }
-        Util.requestPermission(this, Manifest.permission.RECORD_AUDIO)
-        Util.requestPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         setupChooseSongButton()
     }
 
@@ -71,10 +69,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun convertWAVToMIDI (wavFile: File) {
-//        val wavFile = FileHelper.assetFileCopy(context!!, "wavable_wavable.wav")
         val wavBytes: ByteArray = FileUtils.readFileToByteArray(wavFile);
         val url = "http://192.168.1.131:5000/wav-to-midi"
-//        val url = "http://10.0.2.2:5000/music"
         val queue = Volley.newRequestQueue(this.applicationContext)
 
         queue.add(makeHttpRequest(url, wavBytes, this.applicationContext!!))
@@ -138,12 +134,6 @@ class MainActivity : AppCompatActivity() {
             Log.e("app", "Midi file could not be read");
             throw Exception("Midi file cannot be read");
         }
-    }
-
-    fun getMusicFile(context: Context): File {
-        val musicFile = FileHelper.getEmptyFileInFolder(context, "music", "recorded_song", ".wav");
-
-        return musicFile
     }
 
     fun setupChooseSongButton() {

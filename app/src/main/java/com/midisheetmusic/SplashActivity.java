@@ -21,7 +21,8 @@ import com.midisheetmusic.sheets.ClefSymbol;
 public class SplashActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE_EXT_STORAGE_ = 724;
-
+    private static final int PERMISSION_REQUEST_CODE_INTERNET_ = 725;
+    private static final int PERMISSION_REQUEST_CODE_RECORD_AUDIO_ = 726;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +41,22 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.INTERNET},
+                    PERMISSION_REQUEST_CODE_INTERNET_);
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    PERMISSION_REQUEST_CODE_RECORD_AUDIO_);
+            return;
+        }
+
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
@@ -48,21 +65,18 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE_EXT_STORAGE_: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission granted
-                    startActivity();
-                } else {
-                    // permission denied
-                    Snackbar.make(findViewById(android.R.id.content),
-                            R.string.msg_permission_denied, Snackbar.LENGTH_INDEFINITE)
-                            .setAction(R.string.msg_permission_denied_retry, view -> startActivity())
-                            .show();
-                }
+        for (int grantResultIndex = 0; grantResultIndex < grantResults.length; grantResultIndex++){
+            if (grantResults[grantResultIndex] == PackageManager.PERMISSION_DENIED) {
+                Snackbar.make(findViewById(android.R.id.content),
+                        R.string.msg_permission_denied, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.msg_permission_denied_retry, view -> startActivity())
+                        .show();
+
+                return;
             }
         }
+
+        startActivity();
     }
 
     /** Load all the resource images */
