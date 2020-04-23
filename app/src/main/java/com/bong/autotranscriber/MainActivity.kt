@@ -1,15 +1,12 @@
 package com.bong.autotranscriber
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.media.AudioFormat
-import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
+import android.text.InputFilter
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -23,6 +20,8 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.midisheetmusic.*
 import kotlinx.android.synthetic.main.fragment_first.*
 import org.apache.commons.io.FileUtils
@@ -30,6 +29,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     var audioFile: File? = null;
+    var snackbar: Snackbar? = null;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
                     ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimaryDark)))
         }
         setupChooseSongButton()
+        snackbar = Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_INDEFINITE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -46,9 +47,12 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == requestRecordAudio) {
             if (resultCode == Activity.RESULT_OK) {
                 convertWAVToMIDI(audioFile!!);
-                Toast.makeText(this, "Audio recorded successfully!", Toast.LENGTH_SHORT).show()
+                snackbar!!
+                        .setText("Converting media to sheet music...")
+                        .show()
+                snackbar!!.duration = BaseTransientBottomBar.LENGTH_LONG
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                Toast.makeText(this, "Audio was not recorded", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Audio was not recorded.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -114,14 +118,18 @@ class MainActivity : AppCompatActivity() {
     private fun createMyReqErrorListener(context: Context): Response.ErrorListener {
         val responseListener = object : Response.ErrorListener {
             override fun onErrorResponse(response: VolleyError) {
-                Toast.makeText(context, "Error: Failed to convert wav to midi", Toast.LENGTH_SHORT)
+                snackbar!!
+                        .setText(R.string.msg_http_request_error_for_wav)
                         .show()
+                snackbar!!.setAction(
+                        "OK"
+                ) { snackbar!!.dismiss() }
             }
         }
         return responseListener
     }
 
-    private fun getMidiFileFromMidi(file: File, title: String): MidiFile {
+    private fun getMidiFileFromMidi(file: File, title: String): MidiFile? {
         val uriFromFile = Uri.fromFile(file)
 
         try {
@@ -131,9 +139,16 @@ class MainActivity : AppCompatActivity() {
 
             return MidiFile(data, title)
         } catch (e: MidiFileException) {
-            Log.e("app", "Midi file could not be read");
-            throw Exception("Midi file cannot be read");
+            snackbar!!
+                    .setText("Midi file could not be read. Please try a shorter recording.")
+                    .show()
+            snackbar!!.setAction(
+                    "OK"
+            ) { snackbar!!.dismiss() }
+            return null
+//            throw Exception("Midi file cannot be read");
         }
+
     }
 
     fun setupChooseSongButton() {
