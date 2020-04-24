@@ -14,9 +14,6 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder
 import cafe.adriel.androidaudiorecorder.model.AudioChannel
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate
 import cafe.adriel.androidaudiorecorder.model.AudioSource
-import com.android.volley.AuthFailureError
-import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.midisheetmusic.*
@@ -24,8 +21,10 @@ import kotlinx.android.synthetic.main.fragment_first.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okio.BufferedSink
-import java.io.*
-import java.lang.Exception
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
     var audioFile: File? = null;
@@ -107,6 +106,20 @@ class MainActivity : AppCompatActivity() {
         getConvertedSongStream(wavFile, this)
     }
 
+    fun copyStreamToFile(inputStream: InputStream, outputStream: FileOutputStream) {
+        inputStream.use { input ->
+            outputStream.use { output ->
+                val buffer = ByteArray(4 * 1024) // buffer size
+                while (true) {
+                    val byteCount = input.read(buffer)
+                    if (byteCount < 0) break
+                    output.write(buffer, 0, byteCount)
+                }
+                output.flush()
+            }
+        }
+    }
+
     fun getConvertedSongStream(file: File, context: Context) {
         val filebytes = file.readBytes()
 
@@ -136,21 +149,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                var bytes: ByteArray? = null;
+                val file = FileHelper.getEmptyFileInFolder(context, "test", "test", ".mid")
+                val fos = FileOutputStream(file)
+                var fis: InputStream? = null;
                 try {
                     if (!response.isSuccessful || response.body == null) throw IOException("Unexpected code " + response);
-                    bytes = response.body!!.bytes()
+                    fis = response.body!!.byteStream()
+                    copyStreamToFile(fis, fos)
+
                 } catch (ex: Exception) {
                     Log.e("app", ex.message)
                     Log.e("app", ex.printStackTrace().toString())
                 }
-
-                val file = FileHelper.getEmptyFileInFolder(context, "test", "test", ".mid")
-                val fos = FileOutputStream(file)
-
-                fos.write(bytes)
-                fos.flush()
-                fos.close()
 
                 moveToSongView(context, file)
             }
