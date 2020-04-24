@@ -7,6 +7,9 @@
         android:id="@+id/save_image"
         android:title="@string/save_image" />
     <item
+        android:id="@+id/save_midi"
+        android:title="@string/save_midi" />
+    <item
         android:id="@+id/print_images_ql"
         android:title="@string/print_images_ql" />
     <item

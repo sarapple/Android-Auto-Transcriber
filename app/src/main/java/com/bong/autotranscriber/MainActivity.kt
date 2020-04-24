@@ -49,8 +49,8 @@ class MainActivity : AppCompatActivity() {
                 convertWAVToMIDI(audioFile!!);
                 snackbar!!
                         .setText("Converting media to sheet music...")
+                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
                         .show()
-                snackbar!!.duration = BaseTransientBottomBar.LENGTH_LONG
             } else if (resultCode == Activity.RESULT_CANCELED) {
 //                Toast.makeText(this, "Audio was not recorded.", Toast.LENGTH_SHORT).show()
             }
@@ -122,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             override fun onErrorResponse(response: VolleyError) {
                 snackbar!!
                         .setText(R.string.msg_http_request_error_for_wav)
+                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
                         .show()
                 snackbar!!.setAction(
                         "OK"
@@ -143,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: MidiFileException) {
             snackbar!!
                     .setText("Midi file could not be read. Please try a shorter recording.")
+                    .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
                     .show()
             snackbar!!.setAction(
                     "OK"

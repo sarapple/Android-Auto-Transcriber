@@ -203,6 +203,7 @@ public class MidiFile {
     private int quarternote;          /** The number of pulses per quarter note */
     private int totalpulses;          /** The total length of the song, in pulses */
     private boolean trackPerChannel;  /** True if we've split each channel into a track */
+    public byte[] rawData;
 
     /* The list of Midi Events */
     public static final byte EventNoteOff         = (byte)0x80;
@@ -439,6 +440,7 @@ public class MidiFile {
     /** Create a new MidiFile from the byte[] */
     public MidiFile(byte[] rawdata, String filename) {
         this.filename = filename;
+        this.rawData = rawdata;
         parse(rawdata);
     }
 
