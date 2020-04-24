@@ -17,17 +17,23 @@ import cafe.adriel.androidaudiorecorder.model.AudioSource
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.Volley
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.midisheetmusic.*
 import kotlinx.android.synthetic.main.fragment_first.*
-import org.apache.commons.io.FileUtils
-import java.io.File
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okio.BufferedSink
+import java.io.*
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     var audioFile: File? = null;
     var snackbar: Snackbar? = null;
+    private val client = OkHttpClient()
+    private val ACTIVITY_REQUEST_RECORD_AUDIO = 0;
+    private val ACTIVITY_CHOOSE_SONG = 1;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,20 +46,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val requestRecordAudio = 0;
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == requestRecordAudio) {
+
+        if (requestCode == ACTIVITY_REQUEST_RECORD_AUDIO) {
             if (resultCode == Activity.RESULT_OK) {
+                // 1MB max for now
+                if (audioFile != null && audioFile!!.length() > 1024 * 1000) {
+                    snackbar!!
+                            .setText(R.string.msg_open_file_error_size)
+                            .setDuration(BaseTransientBottomBar.LENGTH_LONG)
+                            .show()
+                    snackbar!!.setAction(
+                            "OK"
+                    ) {
+                        snackbar!!.dismiss()
+                    }
+
+                    return
+                }
+
                 convertWAVToMIDI(audioFile!!);
                 snackbar!!
                         .setText("Converting media to sheet music...")
                         .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
                         .show()
             } else if (resultCode == Activity.RESULT_CANCELED) {
-//                Toast.makeText(this, "Audio was not recorded.", Toast.LENGTH_SHORT).show()
             }
         }
-        else if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        else if (requestCode == ACTIVITY_CHOOSE_SONG && resultCode == Activity.RESULT_OK) {
             val sourceTreeUri = data!!.data
             val byteData = contentResolver.openInputStream(sourceTreeUri!!)!!.readBytes()
             val midiFile = MidiFile(byteData, sourceTreeUri.pathSegments[sourceTreeUri.pathSegments.size-1])
@@ -66,45 +86,83 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun recordAudio(v: View?) {
+        if (audioFile != null) {
+            audioFile!!.delete();
+        }
         audioFile = FileHelper.getEmptyFileInFolder(this.applicationContext,"audio", "recording", ".wav")
-        val requestRecordAudio = 0;
         AndroidAudioRecorder.with(this) // Required
                 .setFilePath(audioFile!!.absolutePath)
                 .setColor(ContextCompat.getColor(this, R.color.recorder_bg))
-                .setRequestCode(requestRecordAudio) // Optional
+                .setRequestCode(ACTIVITY_REQUEST_RECORD_AUDIO) // Optional
                 .setSource(AudioSource.MIC)
                 .setChannel(AudioChannel.MONO)
                 .setSampleRate(AudioSampleRate.HZ_16000)
                 .setAutoStart(false)
                 .setKeepDisplayOn(true) // Start recording
                 .record()
+
     }
 
     fun convertWAVToMIDI (wavFile: File) {
-        val wavBytes: ByteArray = FileUtils.readFileToByteArray(wavFile);
-        val url = "http://192.168.1.131:5000/wav-to-midi"
-//        val url = "http://10.0.2.2:5000/wav-to-midi"
-
-        val queue = Volley.newRequestQueue(this.applicationContext)
-
-        queue.add(makeHttpRequest(url, wavBytes, this.applicationContext!!))
+        getConvertedSongStream(wavFile, this)
     }
 
-    fun makeHttpRequest(url: String?, byteArray: ByteArray, context: Context): ByteArrayRequest {
-        return object : ByteArrayRequest(
-                url,
-                createMyReqSuccessListener(context),
-                createMyReqErrorListener(context)
-        ) {
-            @Throws(AuthFailureError::class)
-            override fun getBody(): ByteArray {
-                return byteArray
+    fun getConvertedSongStream(file: File, context: Context) {
+        val filebytes = file.readBytes()
+
+        val requestBody = object : RequestBody() {
+            override fun contentType() = MEDIA_TYPE_AUDIO
+
+            override fun writeTo(sink: BufferedSink) {
+                sink.write(filebytes)
             }
         }
+
+        val request = Request.Builder()
+                .url("http://192.168.1.131:5000/wav-to-midi")
+//                .url("http://10.0.2.2:5000/upload")
+                .post(requestBody)
+                .build()
+
+        client.newCall(request).enqueue(object: Callback {
+            override fun onFailure(call: Call, e: IOException): Unit {
+                snackbar!!
+                        .setText(R.string.msg_http_request_error_for_wav)
+                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
+                        .show()
+                snackbar!!.setAction(
+                        "OK"
+                ) { snackbar!!.dismiss() }
+            }
+
+            override fun onResponse(call: Call, response: okhttp3.Response) {
+                var bytes: ByteArray? = null;
+                try {
+                    if (!response.isSuccessful || response.body == null) throw IOException("Unexpected code " + response);
+                    bytes = response.body!!.bytes()
+                } catch (ex: Exception) {
+                    Log.e("app", ex.message)
+                    Log.e("app", ex.printStackTrace().toString())
+                }
+
+                val file = FileHelper.getEmptyFileInFolder(context, "test", "test", ".mid")
+                val fos = FileOutputStream(file)
+
+                fos.write(bytes)
+                fos.flush()
+                fos.close()
+
+                moveToSongView(context, file)
+            }
+        });
+    }
+
+    companion object {
+        val MEDIA_TYPE_AUDIO = "audio/x-wav; charset=utf-8".toMediaType()
     }
 
     private fun moveToSongView (context: Context, file: File) {
-        val midiFile = getMidiFileFromMidi(file, "Auto");
+        val midiFile = getMidiFileFromMidi(file, "Recorded");
         val intent = Intent(Intent.ACTION_VIEW, Uri.fromFile(file), context, SheetMusicActivity::class.java)
         intent.putExtra(SheetMusicActivity.MidiTitleID, midiFile.toString())
         startActivity(intent)
@@ -118,36 +176,6 @@ class MainActivity : AppCompatActivity() {
         // directory.
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivityForResult(intent, 1)
-    }
-
-    private fun createMyReqSuccessListener(context: Context): Response.Listener<ByteArray> {
-        val responseListener = object : Response.Listener<ByteArray> {
-            override fun onResponse(response: ByteArray) {
-                val file = FileHelper.getEmptyFileInFolder(context, "midi", "mid", ".mid")
-                file.writeBytes(response)
-//                Toast.makeText(context, "Acquired midi data from wav file", Toast.LENGTH_SHORT)
-//                        .show()
-                moveToSongView(context, file);
-
-            }
-        }
-        return responseListener
-    }
-
-
-    private fun createMyReqErrorListener(context: Context): Response.ErrorListener {
-        val responseListener = object : Response.ErrorListener {
-            override fun onErrorResponse(response: VolleyError) {
-                snackbar!!
-                        .setText(R.string.msg_http_request_error_for_wav)
-                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
-                        .show()
-                snackbar!!.setAction(
-                        "OK"
-                ) { snackbar!!.dismiss() }
-            }
-        }
-        return responseListener
     }
 
     private fun getMidiFileFromMidi(file: File, title: String): MidiFile? {

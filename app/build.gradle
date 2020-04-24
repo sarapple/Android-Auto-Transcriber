@@ -29,6 +29,9 @@ android {
         targetCompatibility = '1.8'
     }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     packagingOptions {
         exclude 'META-INF/library-core_release.kotlin_module'
     }
@@ -40,6 +43,7 @@ dependencies {
     implementation 'com.kailashdabhi:om-recorder:1.1.0'
     implementation project(":BrotherPrintLibrary")
     implementation 'com.github.adrielcafe:AndroidAudioRecorder:0.3.0'
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'

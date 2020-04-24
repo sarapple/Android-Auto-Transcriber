@@ -47,6 +47,7 @@
     <string name="browse_files_str">Browse for MIDI Files</string>
     <string name="msg_permission_denied">All permissions are needed for proper functioning of the app.</string>
     <string name="msg_http_request_error_for_wav">Failed to convert recording to sheet music.</string>
+    <string name="msg_open_file_error_size">Failed to open file. Please try a shorter recording.</string>
     <string name="msg_permission_denied_retry">Try again</string>
     <string name="err_file_not_found">Not found: Item doesn\'t exist!</string>
     <string name="title_activity_settings">Song Settings</string>
