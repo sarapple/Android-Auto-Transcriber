@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder
 import cafe.adriel.androidaudiorecorder.model.AudioChannel
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate
@@ -56,8 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
         else if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val sourceTreeUri = data!!.data
-            val file = File(sourceTreeUri!!.path)
-            val byteData = contentResolver.openInputStream(sourceTreeUri)!!.readBytes()
+            val byteData = contentResolver.openInputStream(sourceTreeUri!!)!!.readBytes()
             val midiFile = MidiFile(byteData, sourceTreeUri.pathSegments[sourceTreeUri.pathSegments.size-1])
             val intent = Intent(Intent.ACTION_VIEW, sourceTreeUri, this, SheetMusicActivity::class.java)
             intent.putExtra(SheetMusicActivity.MidiTitleID, midiFile.toString())
