@@ -27,6 +27,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 
+
 class MainActivity : AppCompatActivity() {
     var audioFile: File? = null;
     var snackbar: Snackbar? = null;
@@ -107,8 +108,9 @@ class MainActivity : AppCompatActivity() {
         getConvertedSongStream(wavFile, this)
     }
 
-    fun copyStreamToFile(inputStream: InputStream, outputStream: FileOutputStream) {
+    fun copyStreamToFile(inputStream: InputStream, file: File) {
         inputStream.use { input ->
+            val outputStream = FileOutputStream(file)
             outputStream.use { output ->
                 val buffer = ByteArray(4 * 1024) // buffer size
                 while (true) {
@@ -151,15 +153,11 @@ class MainActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
                 val file = FileHelper.getEmptyFileInFolder(context, "test", "test", ".mid")
-                val fos = FileOutputStream(file)
-                var fis: InputStream? = null;
-                try {
-                    if (!response.isSuccessful || response.body == null) throw IOException("Unexpected code " + response);
-                    val buffer = Buffer()
-                    response.body!!.source().read(buffer, 8192)
-                    fis = buffer.inputStream()
-                    copyStreamToFile(fis, fos)
 
+                try {
+                    if (!response.isSuccessful) throw IOException("Unexpected code " + response);
+                    val bufferedSource = response.body!!.byteStream()
+                    copyStreamToFile(bufferedSource, file);
                 } catch (ex: Exception) {
                     Log.e("app", ex.message)
                     Log.e("app", ex.printStackTrace().toString())
