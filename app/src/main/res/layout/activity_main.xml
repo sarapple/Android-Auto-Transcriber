@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LinearLayout02"
     android:layout_width="match_parent"
@@ -12,15 +13,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="158dp"
-        android:layout_gravity="bottom|right">
+        android:layout_gravity="start">
 
         <ImageView
+            android:paddingLeft="20dp"
             android:id="@+id/imageView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
             android:contentDescription="Recording frequency"
             android:src="@drawable/rhythm_icon" />
 
@@ -28,9 +27,6 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
             android:gravity="center"
             android:text="Record and Transcribe."
             android:textSize="18sp" />
@@ -39,30 +35,46 @@
     <LinearLayout
         android:id="@+id/LinearLayout01"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right">
+        android:layout_height="80dp"
+        android:gravity="end">
 
-        <Button
-            android:id="@+id/button_record"
+        <RelativeLayout
+            android:gravity="end"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/play_icon"
-            android:onClick="recordAudio" />
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_view_play"
+                app:srcCompat="@drawable/button_play"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button_play"
+                android:background="#00000000"
+                android:onClick="recordAudio"
+                />
+        </RelativeLayout>
+        <RelativeLayout
+            android:gravity="end"
+            android:paddingRight="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_view_choose_song"
+                app:srcCompat="@drawable/button_choose_song"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button_choose_song"
+                android:background="#00000000"
+                />
+        </RelativeLayout>
 
-        <Button
-            android:id="@+id/button_choose_song"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/choose_song_icon"
-            />
     </LinearLayout>
 
 </LinearLayout>
