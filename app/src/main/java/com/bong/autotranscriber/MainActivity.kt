@@ -6,12 +6,11 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.text.InputFilter
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder
 import cafe.adriel.androidaudiorecorder.model.AudioChannel
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate
@@ -54,6 +53,17 @@ class MainActivity : AppCompatActivity() {
             } else if (resultCode == Activity.RESULT_CANCELED) {
 //                Toast.makeText(this, "Audio was not recorded.", Toast.LENGTH_SHORT).show()
             }
+        }
+        else if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            val sourceTreeUri = data!!.data
+            val file = File(sourceTreeUri!!.path)
+            val byteData = contentResolver.openInputStream(sourceTreeUri)!!.readBytes()
+            val midiFile = MidiFile(byteData, sourceTreeUri.pathSegments[sourceTreeUri.pathSegments.size-1])
+            val intent = Intent(Intent.ACTION_VIEW, sourceTreeUri, this, SheetMusicActivity::class.java)
+            intent.putExtra(SheetMusicActivity.MidiTitleID, midiFile.toString())
+
+            startActivity(intent)
+
         }
     }
 
@@ -102,13 +112,23 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun selectMidiFile() {
+        // Choose a directory using the system's file picker.
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.setType("audio/x-mid");
+        // Provide read access to files and sub-directories in the user-selected
+        // directory.
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivityForResult(intent, 1)
+    }
+
     private fun createMyReqSuccessListener(context: Context): Response.Listener<ByteArray> {
         val responseListener = object : Response.Listener<ByteArray> {
             override fun onResponse(response: ByteArray) {
                 val file = FileHelper.getEmptyFileInFolder(context, "midi", "mid", ".mid")
                 file.writeBytes(response)
-                Toast.makeText(context, "Acquired midi data from wav file", Toast.LENGTH_SHORT)
-                        .show()
+//                Toast.makeText(context, "Acquired midi data from wav file", Toast.LENGTH_SHORT)
+//                        .show()
                 moveToSongView(context, file);
 
             }
@@ -158,8 +178,7 @@ class MainActivity : AppCompatActivity() {
     fun setupChooseSongButton() {
         button_choose_song.setOnClickListener {
             Log.v("app", "here");
-            val intent = Intent(Intent.ACTION_VIEW, null, this.applicationContext, ChooseSongActivity::class.java)
-            startActivity(intent)
+            selectMidiFile()
         }
     }
 }

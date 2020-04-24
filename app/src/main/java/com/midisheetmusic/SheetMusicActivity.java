@@ -113,14 +113,18 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         if (title == null) {
             title = uri.getLastPathSegment();
         }
-        FileUri file = new FileUri(uri, title);
         this.setTitle("MidiSheetMusic: " + title);
-        byte[] data;
+
+        byte[] data = new byte[1000];
         try {
-            data = file.getData(this);
+            getContentResolver().openInputStream(uri).read(data);
             midifile = new MidiFile(data, title);
         }
         catch (MidiFileException e) {
+            this.finish();
+            return;
+        }
+        catch (Exception e) {
             this.finish();
             return;
         }
