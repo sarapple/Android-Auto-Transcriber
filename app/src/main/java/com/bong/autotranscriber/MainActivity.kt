@@ -20,6 +20,7 @@ import com.midisheetmusic.*
 import kotlinx.android.synthetic.main.fragment_first.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
+import okio.Buffer
 import okio.BufferedSink
 import java.io.File
 import java.io.FileOutputStream
@@ -154,7 +155,9 @@ class MainActivity : AppCompatActivity() {
                 var fis: InputStream? = null;
                 try {
                     if (!response.isSuccessful || response.body == null) throw IOException("Unexpected code " + response);
-                    fis = response.body!!.byteStream()
+                    val buffer = Buffer()
+                    response.body!!.source().read(buffer, 8192)
+                    fis = buffer.inputStream()
                     copyStreamToFile(fis, fos)
 
                 } catch (ex: Exception) {
@@ -169,6 +172,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val MEDIA_TYPE_AUDIO = "audio/x-wav; charset=utf-8".toMediaType()
+        val MEDIA_TYPE_BINARY = "application/octet-stream".toMediaType()
     }
 
     private fun moveToSongView (context: Context, file: File) {
