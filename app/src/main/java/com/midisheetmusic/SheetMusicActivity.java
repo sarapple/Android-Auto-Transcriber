@@ -115,7 +115,7 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         }
         this.setTitle("MidiSheetMusic: " + title);
 
-        byte[] data = new byte[1000];
+        byte[] data = new byte[1024];
         try {
             getContentResolver().openInputStream(uri).read(data);
             midifile = new MidiFile(data, title);
