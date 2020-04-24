@@ -4,6 +4,9 @@
         android:id="@+id/song_settings"
         android:title="@string/song_settings_str" />
     <item
+        android:id="@+id/save_image"
+        android:title="@string/save_image" />
+    <item
         android:id="@+id/print_images_ql"
         android:title="@string/print_images_ql" />
     <item

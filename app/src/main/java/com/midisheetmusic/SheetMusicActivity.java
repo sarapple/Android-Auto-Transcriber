@@ -12,6 +12,7 @@
 
 package com.midisheetmusic;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,8 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.bong.autotranscriber.Brother;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bong.autotranscriber.FileHelper;
@@ -51,6 +55,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -274,6 +279,10 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 changeSettings();
                 drawer.closeDrawer();
                 break;
+            case R.id.save_image:
+                openDirectory();
+                drawer.closeDrawer();
+                break;
             case R.id.print_images_ql:
                 printImageQL("Printing", this);
                 drawer.closeDrawer();
@@ -392,6 +401,40 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         return imageOrig;
     }
 
+    public void openDirectory() {
+        // Choose a directory using the system's file picker.
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+        // Provide read access to files and sub-directories in the user-selected
+        // directory.
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivityForResult(intent, 1000);
+    }
+
+
+    private void saveImage(Uri uri, String filename, Context context) {
+        try {
+            Bitmap bitmap = getBitmapFromView(sheet, BLACK);
+            Bitmap image = sheet.DrawPage();
+
+            DocumentFile docFile = DocumentFile.fromTreeUri(this, uri).createFile("image/png", filename + ".png");
+            OutputStream fOut = getContentResolver().openOutputStream(docFile.getUri());
+            image.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+
+            fOut.flush();
+            fOut.close();
+            Log.v("app", "saved");
+//
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("app", e.getMessage());
+            Toast.makeText(this, "Error: failed to save.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
     private void printImageQL(String filename, Context context) {
         Bitmap bitmap = getImagesFromPages(filename, context);
 
@@ -465,9 +508,19 @@ public class SheetMusicActivity extends MidiHandlingActivity {
      */
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent intent) {
+        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
+            Log.v("app", "Saving file");
+            Uri uri = null;
+            if (intent != null) {
+                uri = intent.getData();
+                saveImage(uri, "SheetMusic", this);
+                return;
+            }
+        }
         if (requestCode != settingsRequestCode) {
             return;
         }
+
         options = (MidiOptions) 
             intent.getSerializableExtra(SettingsActivity.settingsID);
 

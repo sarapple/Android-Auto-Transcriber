@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity() {
     fun convertWAVToMIDI (wavFile: File) {
         val wavBytes: ByteArray = FileUtils.readFileToByteArray(wavFile);
         val url = "http://192.168.1.131:5000/wav-to-midi"
+//        val url = "http://10.0.2.2:5000/wav-to-midi"
+
         val queue = Volley.newRequestQueue(this.applicationContext)
 
         queue.add(makeHttpRequest(url, wavBytes, this.applicationContext!!))
