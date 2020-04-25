@@ -29,6 +29,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -279,12 +280,8 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 changeSettings();
                 drawer.closeDrawer();
                 break;
-            case R.id.save_image:
-                openDirectoryAndSaveImage();
-                drawer.closeDrawer();
-                break;
-            case R.id.save_midi:
-                openDirectoryAndSaveMIDI();
+            case R.id.save_as:
+                openDirectoryAndSaveAs();
                 drawer.closeDrawer();
                 break;
             case R.id.print:
@@ -352,16 +349,27 @@ public class SheetMusicActivity extends MidiHandlingActivity {
 
 
     /* Show the "Save As Images" dialog */
-    private void showSaveImagesDialog(Uri uri, Context context) {
+    private void showSaveAsDialog(Uri uri) {
          LayoutInflater inflator = LayoutInflater.from(this);
          final View dialogView= inflator.inflate(R.layout.save_images_dialog, layout, false);
          final EditText filenameView = dialogView.findViewById(R.id.save_images_filename);
+         final CheckBox saveAsMidiCheckbox = dialogView.findViewById(R.id.save_as_midi);
+        final CheckBox saveAsImageCheckbox = dialogView.findViewById(R.id.save_as_png);
          filenameView.setText("my_sheet_music");
          AlertDialog.Builder builder = new AlertDialog.Builder(this);
-         builder.setTitle(R.string.save_images_str);
+         builder.setTitle(R.string.save_as_str);
          builder.setView(dialogView);
          builder.setPositiveButton("OK",
-                 (builder1, whichButton) -> saveImage(uri, filenameView.getText().toString(), this));
+                 (builder1, whichButton) -> {
+                    final String filename = filenameView.getText().toString();
+                    if (saveAsImageCheckbox.isChecked()) {
+                        saveImage(uri, filename, this);
+                    }
+                    if (saveAsMidiCheckbox.isChecked()) {
+                        saveMidi(uri, filename, this);
+                    }
+                 }
+                 );
          builder.setNegativeButton("Cancel",
                  (builder12, whichButton) -> {
          });
@@ -386,23 +394,6 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                     }
                 }
                 );
-        builder.setNegativeButton("Cancel",
-                (builder12, whichButton) -> {
-                });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void showSaveMIDIDialog(Uri uri, Context context) {
-        LayoutInflater inflator = LayoutInflater.from(this);
-        final View dialogView= inflator.inflate(R.layout.save_images_dialog, layout, false);
-        final EditText filenameView = dialogView.findViewById(R.id.save_images_filename);
-        filenameView.setText("my_song");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.save_images_midi);
-        builder.setView(dialogView);
-        builder.setPositiveButton("OK",
-                (builder1, whichButton) -> saveMidi(uri, filenameView.getText().toString(), this));
         builder.setNegativeButton("Cancel",
                 (builder12, whichButton) -> {
                 });
@@ -442,7 +433,7 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         return imageOrig;
     }
 
-    public void openDirectoryAndSaveImage() {
+    public void openDirectoryAndSaveAs() {
         // Choose a directory using the system's file picker.
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
 
@@ -451,17 +442,6 @@ public class SheetMusicActivity extends MidiHandlingActivity {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         startActivityForResult(intent, 1000);
-    }
-
-    public void openDirectoryAndSaveMIDI() {
-        // Choose a directory using the system's file picker.
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-
-        // Provide read access to files and sub-directories in the user-selected
-        // directory.
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        startActivityForResult(intent, 1001);
     }
 
 
@@ -486,7 +466,7 @@ public class SheetMusicActivity extends MidiHandlingActivity {
 
     private void saveMidi(Uri uri, String filename, Context context) {
         try {
-            DocumentFile docFile = DocumentFile.fromTreeUri(this, uri).createFile("audio/x-mid", filename + ".mid");
+            DocumentFile docFile = DocumentFile.fromTreeUri(this, uri).createFile("audio/midi", filename + ".mid");
             OutputStream fOut = getContentResolver().openOutputStream(docFile.getUri());
             fOut.write(midifile.rawData);
             fOut.flush();
@@ -589,20 +569,11 @@ public class SheetMusicActivity extends MidiHandlingActivity {
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent intent) {
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-            Log.v("app", "Saving file");
+            Log.v("app", "Saving as");
             Uri uri = null;
             if (intent != null) {
                 uri = intent.getData();
-                showSaveImagesDialog(uri, this);
-                return;
-            }
-        }
-        else if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
-            Log.v("app", "Saving midi");
-            Uri uri = null;
-            if (intent != null) {
-                uri = intent.getData();
-                showSaveMIDIDialog(uri, this);
+                showSaveAsDialog(uri);
                 return;
             }
         }

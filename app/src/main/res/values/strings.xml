@@ -10,10 +10,11 @@
     <string name="print_images_ql">Print To QL</string>
     <string name="app_name">Auto Transcorder</string>
     <string name="song_settings_str">More Settings</string>
+    <string name="save_as_str">Save As</string>
     <string name="save_images_str">Save As Images</string>
     <string name="save_images_midi">Save As MIDI</string>
     <string name="print_image_dialog">Choose the printer you would like to print the image to:</string>
-    <string name="save_images_descr_str">Save the sheet music as images with the following filename</string>
+    <string name="save_images_descr_str">Save the sheet music in the following file types:</string>
     <string name="save_images_descr_midi">Save the sheet music as midi with the following filename</string>
     <string name="help_str">Help</string>
     <string name="sheet_prefs_title">Sheet Music Preferences</string>
@@ -49,7 +50,7 @@
     <string name="browse_files_str">Browse for MIDI Files</string>
     <string name="msg_permission_denied">All permissions are needed for proper functioning of the app.</string>
     <string name="msg_http_request_error_for_wav">Failed to convert recording to sheet music.</string>
-    <string name="msg_open_file_error_size">Failed to open file. Please try a shorter recording.</string>
+    <string name="msg_open_file_error_size">Failed to open file. File is too large. Please try a shorter recording.</string>
     <string name="msg_permission_denied_retry">Try again</string>
     <string name="err_file_not_found">Not found: Item doesn\'t exist!</string>
     <string name="title_activity_settings">Song Settings</string>

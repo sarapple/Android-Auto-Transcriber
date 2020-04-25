@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == ACTIVITY_REQUEST_RECORD_AUDIO) {
             if (resultCode == Activity.RESULT_OK) {
                 // 1MB max for now
-                if (audioFile != null && audioFile!!.length() > 1024 * 1000) {
+                if (audioFile != null && audioFile!!.length() > 1024 * 4000) {
                     snackbar!!
                             .setText(R.string.msg_open_file_error_size)
                             .setDuration(BaseTransientBottomBar.LENGTH_LONG)
@@ -75,7 +76,53 @@ class MainActivity : AppCompatActivity() {
         }
         else if (requestCode == ACTIVITY_CHOOSE_SONG && resultCode == Activity.RESULT_OK) {
             val sourceTreeUri = data!!.data
+
+            /*
+             * Get the file's content URI from the incoming Intent,
+             * then query the server app to get the file's display name
+             * and size.
+             */
+            sourceTreeUri?.let { returnUri ->
+                contentResolver.query(returnUri, null, null, null, null)
+            }?.use { cursor ->
+                /*
+                 * Get the column indexes of the data in the Cursor,
+                 * move to the first row in the Cursor, get the data,
+                 * and display it.
+                 */
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                cursor.moveToFirst()
+                val size = cursor.getLong(sizeIndex)
+                if (size > 1024L * 4000L) {
+                    snackbar!!
+                            .setText(R.string.msg_open_file_error_size)
+                            .setDuration(BaseTransientBottomBar.LENGTH_LONG)
+                            .show()
+                    snackbar!!.setAction(
+                            "OK"
+                    ) {
+                        snackbar!!.dismiss()
+                    }
+
+                    return
+                }
+            }
+
             val inputStream = contentResolver.openInputStream(sourceTreeUri!!)
+            val contentType = contentResolver.getType(sourceTreeUri)
+
+            if (contentType == "audio/x-wav" || contentType == "audio/wav") {
+                val tempWAV = FileHelper.getEmptyFileInFolder(this, "wav", "copy", ".wav")
+                copyStreamToFile(inputStream!!, tempWAV)
+
+                convertWAVToMIDI(tempWAV);
+                snackbar!!
+                        .setText("Converting media to sheet music...")
+                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
+                        .show()
+
+                return;
+            }
             val file = FileHelper.getEmptyFileInFolder(this, "test", "test", ".mid")
             copyStreamToFile(inputStream!!, file);
             convertMIDIToMIDI(file)
@@ -200,7 +247,9 @@ class MainActivity : AppCompatActivity() {
     fun selectMidiFile() {
         // Choose a directory using the system's file picker.
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.setType("audio/x-mid");
+        val mimeTypes = arrayOf("audio/wav", "audio/x-wav", "audio/midi", "audio/midi")
+        intent.setType("audio/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         // Provide read access to files and sub-directories in the user-selected
         // directory.
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
