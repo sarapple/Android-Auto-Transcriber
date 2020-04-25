@@ -18,7 +18,7 @@ import cafe.adriel.androidaudiorecorder.model.AudioSource
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.midisheetmusic.*
-import kotlinx.android.synthetic.main.fragment_first.*
+import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okio.BufferedSink
