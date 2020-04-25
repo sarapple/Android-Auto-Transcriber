@@ -185,38 +185,30 @@ public class MidiPlayer extends LinearLayout {
         inflate(activity, R.layout.player_toolbar, this);
 
         ImageButton backButton = findViewById(R.id.btn_back);
-        ImageButton rewindButton = findViewById(R.id.btn_rewind);
         ImageButton resetButton = findViewById(R.id.btn_replay);
         ImageButton playButton = findViewById(R.id.btn_play);
-        ImageButton fastFwdButton = findViewById(R.id.btn_forward);
         ImageButton settingsButton = findViewById(R.id.btn_settings);
-        leftHandButton = findViewById(R.id.btn_left);
-        rightHandButton = findViewById(R.id.btn_right);
-        midiButton = findViewById(R.id.btn_midi);
         pianoButton = findViewById(R.id.btn_piano);
-        speedText = findViewById(R.id.txt_speed);
         speedBar = findViewById(R.id.speed_bar);
 
         backButton.setOnClickListener(v -> activity.onBackPressed());
-        rewindButton.setOnClickListener(v -> Rewind());
         resetButton.setOnClickListener(v -> Reset());
         playButton.setOnClickListener(v -> Play());
-        fastFwdButton.setOnClickListener(v -> FastForward());
         settingsButton.setOnClickListener(v -> {
             drawer.deselect();
             drawer.openDrawer();
         });
-        midiButton.setOnClickListener(v -> toggleMidi());
-        leftHandButton.setOnClickListener(v -> toggleTrack(LEFT_TRACK));
-        rightHandButton.setOnClickListener(v -> toggleTrack(RIGHT_TRACK));
+//        midiButton.setOnClickListener(v -> toggleMidi());
+//        leftHandButton.setOnClickListener(v -> toggleTrack(LEFT_TRACK));
+//        rightHandButton.setOnClickListener(v -> toggleTrack(RIGHT_TRACK));
         pianoButton.setOnClickListener(v -> togglePiano());
 
         // Resize the speedBar so all toolbar icons fit on the screen
         speedBar.post(
                 () -> {
                     int iconsWidth = backButton.getWidth() + resetButton.getWidth() + playButton.getWidth() +
-                            rewindButton.getWidth() + fastFwdButton.getWidth() + midiButton.getWidth() +
-                            leftHandButton.getWidth() + rightHandButton.getWidth() + pianoButton.getWidth() +
+//                            midiButton.getWidth() +
+                            pianoButton.getWidth() +
                             settingsButton.getWidth();
                     int screenwidth = activity.getWindowManager().getDefaultDisplay().getWidth();
                     speedBar.setLayoutParams(
@@ -232,7 +224,7 @@ public class MidiPlayer extends LinearLayout {
                     progress = 100;
                     bar.setProgress(progress);
                 }
-                speedText.setText(String.format(Locale.US, "%3d", progress) + "%");
+//                speedText.setText(String.format(Locale.US, "%3d", progress) + "%");
             }
             public void onStartTrackingTouch(SeekBar bar) {
             }
@@ -296,10 +288,10 @@ public class MidiPlayer extends LinearLayout {
         if (RIGHT_TRACK < options.tracks.length) {
             rightAlpha = options.tracks[RIGHT_TRACK] ? (float) 1.0 : (float) 0.5;
         }
-        leftHandButton.setVisibility(LEFT_TRACK < options.tracks.length ? View.VISIBLE : View.GONE);
-        rightHandButton.setVisibility(RIGHT_TRACK < options.tracks.length ? View.VISIBLE : View.GONE);
-        leftHandButton.setAlpha(leftAlpha);
-        rightHandButton.setAlpha(rightAlpha);
+//        leftHandButton.setVisibility(LEFT_TRACK < options.tracks.length ? View.VISIBLE : View.GONE);
+//        rightHandButton.setVisibility(RIGHT_TRACK < options.tracks.length ? View.VISIBLE : View.GONE);
+//        leftHandButton.setAlpha(leftAlpha);
+//        rightHandButton.setAlpha(rightAlpha);
     }
 
     /** Get the preferred width/height given the screen width/height */
