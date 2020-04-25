@@ -5,12 +5,14 @@
     <string name="stop">Stop</string>
     <string name="save_image">Save Image</string>
     <string name="save_midi">Save MIDI</string>
+    <string name="print">Print</string>
     <string name="print_images_rj">Print To RJ</string>
     <string name="print_images_ql">Print To QL</string>
     <string name="app_name">Auto Transcorder</string>
     <string name="song_settings_str">More Settings</string>
     <string name="save_images_str">Save As Images</string>
     <string name="save_images_midi">Save As MIDI</string>
+    <string name="print_image_dialog">Choose the printer you would like to print the image to:</string>
     <string name="save_images_descr_str">Save the sheet music as images with the following filename</string>
     <string name="save_images_descr_midi">Save the sheet music as midi with the following filename</string>
     <string name="help_str">Help</string>

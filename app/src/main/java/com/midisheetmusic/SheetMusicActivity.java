@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 import com.bong.autotranscriber.Brother;
 
@@ -286,12 +287,8 @@ public class SheetMusicActivity extends MidiHandlingActivity {
                 openDirectoryAndSaveMIDI();
                 drawer.closeDrawer();
                 break;
-            case R.id.print_images_ql:
-                printImageQL("Printing", this);
-                drawer.closeDrawer();
-                break;
-            case R.id.print_images_rj:
-                printImageRJ("Printing", this);
+            case R.id.print:
+                printImagesDialog(getApplicationContext());
                 drawer.closeDrawer();
                 break;
             case ID_LOOP_START:
@@ -370,6 +367,30 @@ public class SheetMusicActivity extends MidiHandlingActivity {
          });
          AlertDialog dialog = builder.create();
          dialog.show();
+    }
+
+    private void printImagesDialog(Context context) {
+        LayoutInflater inflator = LayoutInflater.from(this);
+        final View dialogView= inflator.inflate(R.layout.print_dialog, layout, false);
+        final RadioGroup radioGroup = dialogView.findViewById(R.id.print_radio_group);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Print");
+        builder.setView(dialogView);
+        builder.setPositiveButton("OK",
+                (builder1, whichButton) -> {
+                    final int checkedId = radioGroup.getCheckedRadioButtonId();
+                    if (checkedId == R.id.ql) {
+                        printImageQL("printout", context);
+                    } else {
+                        printImageRJ("printout", context);
+                    }
+                }
+                );
+        builder.setNegativeButton("Cancel",
+                (builder12, whichButton) -> {
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void showSaveMIDIDialog(Uri uri, Context context) {

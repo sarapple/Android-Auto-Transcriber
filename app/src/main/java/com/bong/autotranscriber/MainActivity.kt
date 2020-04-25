@@ -20,7 +20,6 @@ import com.midisheetmusic.*
 import kotlinx.android.synthetic.main.fragment_first.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okio.Buffer
 import okio.BufferedSink
 import java.io.File
 import java.io.FileOutputStream
@@ -76,13 +75,15 @@ class MainActivity : AppCompatActivity() {
         }
         else if (requestCode == ACTIVITY_CHOOSE_SONG && resultCode == Activity.RESULT_OK) {
             val sourceTreeUri = data!!.data
-            val byteData = contentResolver.openInputStream(sourceTreeUri!!)!!.readBytes()
-            val midiFile = MidiFile(byteData, sourceTreeUri.pathSegments[sourceTreeUri.pathSegments.size-1])
-            val intent = Intent(Intent.ACTION_VIEW, sourceTreeUri, this, SheetMusicActivity::class.java)
-            intent.putExtra(SheetMusicActivity.MidiTitleID, midiFile.toString())
+            val inputStream = contentResolver.openInputStream(sourceTreeUri!!)
+            val file = FileHelper.getEmptyFileInFolder(this, "test", "test", ".mid")
+            copyStreamToFile(inputStream!!, file);
+            convertMIDIToMIDI(file)
 
-            startActivity(intent)
-
+            snackbar!!
+                    .setText("Converting media to sheet music...")
+                    .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
+                    .show()
         }
     }
 
@@ -105,7 +106,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun convertWAVToMIDI (wavFile: File) {
-        getConvertedSongStream(wavFile, this)
+        getConvertedSongStream(wavFile, this, "wav-to-midi")
+    }
+
+    fun convertMIDIToMIDI (midiFile: File) {
+        getConvertedSongStream(midiFile, this, "midi-to-midi")
     }
 
     fun copyStreamToFile(inputStream: InputStream, file: File) {
@@ -123,11 +128,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getConvertedSongStream(file: File, context: Context) {
+    fun getConvertedSongStream(file: File, context: Context, endpoint: String) {
         val filebytes = file.readBytes()
 
         val requestBody = object : RequestBody() {
-            override fun contentType() = MEDIA_TYPE_AUDIO
+            override fun contentType(): MediaType {
+                return if (endpoint == "wav-to-midi") MEDIA_TYPE_AUDIO_WAV else MEDIA_TYPE_AUDIO_MIDI;
+            }
 
             override fun writeTo(sink: BufferedSink) {
                 sink.write(filebytes)
@@ -135,20 +142,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         val request = Request.Builder()
-                .url("http://192.168.1.131:5000/wav-to-midi")
-//                .url("http://10.0.2.2:5000/upload")
+//                .url("http://192.168.1.131:5000/" + endpoint)
+                .url("http://10.0.2.2:5000/" + endpoint)
                 .post(requestBody)
                 .build()
 
         client.newCall(request).enqueue(object: Callback {
             override fun onFailure(call: Call, e: IOException): Unit {
-                snackbar!!
-                        .setText(R.string.msg_http_request_error_for_wav)
-                        .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
-                        .show()
-                snackbar!!.setAction(
-                        "OK"
-                ) { snackbar!!.dismiss() }
+                runOnUiThread {
+                    snackbar!!
+                            .setText(R.string.msg_http_request_error_for_wav)
+                            .setDuration(BaseTransientBottomBar.LENGTH_SHORT)
+                            .show()
+                    snackbar!!.setAction(
+                            "OK"
+                    ) { snackbar!!.dismiss() }
+
+                    if (endpoint == "midi-to-midi") { // FALLBACK if network error
+                        moveToSongView(context, file)
+                    }
+                }
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
@@ -163,13 +176,17 @@ class MainActivity : AppCompatActivity() {
                     Log.e("app", ex.printStackTrace().toString())
                 }
 
-                moveToSongView(context, file)
+                runOnUiThread {
+                    moveToSongView(context, file)
+                }
+
             }
         });
     }
 
     companion object {
-        val MEDIA_TYPE_AUDIO = "audio/x-wav; charset=utf-8".toMediaType()
+        val MEDIA_TYPE_AUDIO_WAV = "audio/x-wav; charset=utf-8".toMediaType()
+        val MEDIA_TYPE_AUDIO_MIDI = "audio/x-mid; charset=utf-8".toMediaType()
         val MEDIA_TYPE_BINARY = "application/octet-stream".toMediaType()
     }
 

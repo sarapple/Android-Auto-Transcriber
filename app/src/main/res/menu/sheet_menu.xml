@@ -10,10 +10,7 @@
         android:id="@+id/save_midi"
         android:title="@string/save_midi" />
     <item
-        android:id="@+id/print_images_ql"
-        android:title="@string/print_images_ql" />
-    <item
-        android:id="@+id/print_images_rj"
-        android:title="@string/print_images_rj" />
+        android:id="@+id/print"
+        android:title="@string/print" />
 </menu>
 
