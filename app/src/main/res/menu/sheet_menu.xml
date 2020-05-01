@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/song_settings"
+        android:title="@string/song_settings_str" />
+    <item
+        android:id="@+id/save_as"
+        android:title="@string/save_as_str" />
+    <item
+        android:id="@+id/print"
+        android:title="@string/print" />
+</menu>
+

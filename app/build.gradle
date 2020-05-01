@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+repositories {
+    maven {
+        url 'https://github.com/joytunes/USB-MIDI-Driver/raw/master/MIDIDriver/snapshots'
+    }
+    mavenCentral()
+}
+android {
+    compileSdkVersion 29
+    buildToolsVersion '29.0.3'
+
+    defaultConfig {
+        applicationId "com.bong.autotranscribers"
+        minSdkVersion 29
+        targetSdkVersion 29
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    packagingOptions {
+        exclude 'META-INF/library-core_release.kotlin_module'
+    }
+}
+
+dependencies {
+    implementation 'commons-io:commons-io:2.5'
+    implementation 'com.kailashdabhi:om-recorder:1.1.0'
+    implementation project(":BrotherPrintLibrary")
+    implementation 'com.github.adrielcafe:AndroidAudioRecorder:0.3.0'
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
+
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'jp.kshoji:midi-driver:0.1.5:@aar'
+    implementation 'androidx.preference:preference:1.1.0-rc01'
+    implementation 'com.android.support:design:29.0.0'
+
+    // For the navigation drawer
+    implementation "com.mikepenz:materialdrawer:7.0.0-rc01"
+    implementation "androidx.recyclerview:recyclerview:1.0.0"
+    implementation "androidx.annotation:annotation:1.1.0"
+    implementation "com.google.android.material:material:1.0.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.0-beta4"
+
+}
